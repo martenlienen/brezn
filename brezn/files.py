@@ -10,19 +10,23 @@ def enumerate_files(root: Path, rules: list[gi.Rule]):
     """Enumerate all files under `root` according to (inverse) gitignore rules."""
 
     assert root.is_dir()
-    dirs = [root]
+    dirs = [(root, None)]
     files = []
     i = 0
     while i < len(dirs):
-        dir = dirs[i]
+        dir, parent_match = dirs[i]
         for name in dir.iterdir():
             f = dir / name
             relpath = f.relative_to(root)
             match = gi._find_match(rules, str(relpath), is_dir=True)
-            if f.is_dir():
-                if match is not False:
-                    dirs.append(f)
-            elif match is True:
+            if match is False:
+                # Explicitly rejected
+                continue
+            elif f.is_dir():
+                # If a parent got explicitly added, bequeath it to the children
+                dirs.append((f, match or parent_match))
+            elif match is True or parent_match is True:
+                # If the file or any of its parents got explicitly added
                 files.append(f)
         i += 1
     return files
