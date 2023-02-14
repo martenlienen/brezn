@@ -1,14 +1,14 @@
-import tomllib
 from dataclasses import dataclass
 from pathlib import Path
+
+import toml
 
 
 @dataclass
 class Config:
     @staticmethod
     def from_pyproject_toml(file: Path):
-        with file.open("rb") as f:
-            pyproject = tomllib.load(f)
+        pyproject = toml.load(file)
         brezn_table = pyproject.get("tool", {}).get("brezn", {})
 
         return Config(
