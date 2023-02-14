@@ -52,6 +52,16 @@ def run(ctx, file, options):
 
     # Parse the rules for which files to copy
     rules = [rule for r in config.files if (rule := gi.try_parse_rule(r)) is not None]
+    if (project_root / ".gitignore").is_file():
+        gitignore = [
+            rule
+            for line in (project_root / ".gitignore").read_text().splitlines()
+            if (rule := gi.try_parse_rule(line)) is not None
+        ]
+        # Negate the gitignore rules to make the "add" rules
+        for rule in gitignore:
+            rule.negative = not rule.negative
+        rules += gitignore
     # Ignore anything in the environment directory
     if env_dir.is_relative_to(project_root):
         rules += [
