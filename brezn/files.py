@@ -18,11 +18,12 @@ def enumerate_files(root: Path, rules: list[gi.Rule]):
         for name in dir.iterdir():
             f = dir / name
             relpath = f.relative_to(root)
-            match = gi._find_match(rules, str(relpath), is_dir=True)
+            is_dir = f.is_dir()
+            match = gi._find_match(rules, str(relpath), is_dir=is_dir)
             if match is False:
                 # Explicitly rejected
                 continue
-            elif f.is_dir():
+            elif is_dir:
                 # If a parent got explicitly added, bequeath it to the children
                 dirs.append((f, match or parent_match))
             elif match is True or parent_match is True:
@@ -50,10 +51,10 @@ def copy_files(from_: Path, to: Path, files: list[Path]):
     dirs = set()
     for f in files:
         dirs.update(f.parents)
-    ignores = set(files) | dirs
+    to_copy = set(files) | dirs
 
     def ignore(path, contents):
         p = Path(path)
-        return [f for f in contents if p / f not in ignores]
+        return [f for f in contents if p / f not in to_copy]
 
     shutil.copytree(from_, to, ignore=ignore)
