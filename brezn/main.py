@@ -84,4 +84,8 @@ def run(ctx, file, options):
     # to and from the program as best as possible.
     if file.is_relative_to(project_root):
         file = file.relative_to(project_root)
+
+    # Change directory to run the command in the copied directory
+    os.chdir(copy_root)
+
     os.execvp((copy_root / file).absolute(), [file] + list(options))
