@@ -6,7 +6,7 @@ import click
 import gitignorant as gi
 
 from .config import Config, find_pyproject_toml
-from .files import copy_files, enumerate_files, hash_files
+from .files import copy_files, enumerate_files, hash_files, symlink_files
 
 # Since this module controls the application, we get the root logger here instead of the
 # one specified by __name__
@@ -69,12 +69,16 @@ def run(ctx, file, options):
         ]
     files = enumerate_files(project_root, rules)
 
+    # Construct the files to symlink into the environment directory
+    symlinks = [Path(s) for s in config.symlinks]
+
     # Copy the project files into the environment directory
     env_dir.mkdir(exist_ok=True, parents=True)
     files_hash = hash_files(files)
     copy_root = env_dir / files_hash
     if not copy_root.is_dir():
         copy_files(project_root, copy_root, files)
+        symlink_files(project_root, copy_root, symlinks)
 
     # Replace the current process to forward stdout, stderr, exit code and anything else
     # to and from the program as best as possible.

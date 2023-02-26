@@ -33,6 +33,11 @@ files = [
   "brezn/**/*.py",
   "config/**/*.yaml",
 ]
+# Rules to select files that should be symlinked into the saved environment. These files are not
+# considered in checking if a change occurred and a new environment has to be created.
+symlinks = [
+  "data/",
+]
 ```
 
 ### Run a command

@@ -58,3 +58,13 @@ def copy_files(from_: Path, to: Path, files: list[Path]):
         return [f for f in contents if p / f not in to_copy]
 
     shutil.copytree(from_, to, ignore=ignore)
+
+
+def symlink_files(from_: Path, to: Path, files: list[Path]):
+    """Symlink `files` from `from`_ to `to`."""
+
+    for f in files:
+        link = to / f
+        target = (from_ / f).resolve()
+
+        link.symlink_to(target)
