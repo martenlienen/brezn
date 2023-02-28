@@ -1,3 +1,4 @@
+import shutil
 import logging
 import os
 from pathlib import Path
@@ -77,8 +78,14 @@ def run(ctx, file, options):
     files_hash = hash_files(files)
     copy_root = env_dir / files_hash
     if not copy_root.is_dir():
-        copy_files(project_root, copy_root, files)
-        symlink_files(project_root, copy_root, symlinks)
+        try:
+            copy_files(project_root, copy_root, files)
+            symlink_files(project_root, copy_root, symlinks)
+        except:
+            # If anything went wrong during copying, delete the broken directory, so
+            # that it will be re-created on the next run
+            shutil.rmtree(copy_root)
+            raise
 
     # Replace the current process to forward stdout, stderr, exit code and anything else
     # to and from the program as best as possible.
