@@ -1,6 +1,7 @@
-import shutil
 import logging
 import os
+import shutil
+import tempfile
 from pathlib import Path
 
 import click
@@ -78,13 +79,26 @@ def run(ctx, file, options):
     files_hash = hash_files(files)
     copy_root = env_dir / files_hash
     if not copy_root.is_dir():
+        # Copy the source code into a temporary directory first, so that another
+        # concurrently running instance of brezn cannot observe a partially created
+        # environment.
+        #
+        # We create the temporary directory in the same directory, so that it is on the
+        # same filesystem and renaming in the end won't have a hidden copy operation.
+        tmp_root = Path(tempfile.mkdtemp(dir=env_dir))
         try:
-            copy_files(project_root, copy_root, files)
-            symlink_files(project_root, copy_root, symlinks)
+            copy_files(project_root, tmp_root, files)
+            symlink_files(project_root, tmp_root, symlinks)
+
+            try:
+                tmp_root.rename(copy_root)
+            except OSError:
+                # A concurrent brezn instance created the environment faster than us.
+                # Just delete our environment and pretend nothing happened.
+                shutil.rmtree(tmp_root)
         except:
-            # If anything went wrong during copying, delete the broken directory, so
-            # that it will be re-created on the next run
-            shutil.rmtree(copy_root)
+            # If anything went wrong during copying, delete the broken directory
+            shutil.rmtree(tmp_root)
             raise
 
     # Replace the current process to forward stdout, stderr, exit code and anything else
