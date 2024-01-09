@@ -43,7 +43,8 @@ symlinks = [
 ### Run a command
 
 `brezn run` creates a new copy of your code and then runs the command you provide from
-there. Note that the working directory will be the directory where you issue `brezn run`.
+there. Note that the working directory will be the directory where brezn copied the
+environment to.
 
 ```sh
 brezn run ./train.py overrides=True
