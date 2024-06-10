@@ -38,14 +38,13 @@ def main(ctx, verbose, config):
 
 
 @main.command(context_settings={"ignore_unknown_options": True})
-@click.argument("file", type=click.Path(exists=True, executable=True, dir_okay=False))
+@click.argument("command")
 @click.argument("options", nargs=-1)
 @click.pass_context
-def run(ctx, file, options):
+def run(ctx, command, options):
     """Run the provided command after copying the environment."""
 
     config: Config = ctx.obj
-    file = Path(file)
 
     project_root = config.project_root
     brezn_dir = config.dir
@@ -59,7 +58,7 @@ def run(ctx, file, options):
             for line in (project_root / ".gitignore").read_text().splitlines()
             if (rule := gi.try_parse_rule(line)) is not None
         ]
-        # Negate the gitignore rules to make them "add" rules
+        # Negate the gitignore rules
         for rule in gitignore:
             rule.negative = not rule.negative
         rules += gitignore
@@ -105,10 +104,8 @@ def run(ctx, file, options):
 
     # Replace the current process to forward stdout, stderr, exit code and anything else
     # to and from the program as best as possible.
-    if file.is_relative_to(project_root):
-        file = file.relative_to(project_root)
 
     # Change directory to run the command in the copied directory
-    os.chdir(copy_root)
+    os.chdir(copy_root.absolute())
 
-    os.execvp((copy_root / file).absolute(), [file] + list(options))
+    os.execvp(command, [command] + list(options))
