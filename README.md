@@ -27,7 +27,7 @@ You can configure `brezn` in a separate section of your `pyproject.toml`.
 ```toml
 [tool.brezn]
 # Directory that brezn should put its internal files and saved environments into
-env_dir = ".brezn"
+dir = ".brezn"
 # Rules in the .gitignore format about which files should be included in the saved environments
 files = [
   "brezn/**/*.py",

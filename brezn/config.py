@@ -13,13 +13,13 @@ class Config:
 
         return Config(
             project_root=file.parent,
-            env_dir=Path(brezn_table.get("env_dir", ".brezn")),
+            dir=Path(brezn_table.get("dir", ".brezn")),
             files=brezn_table.get("files", []),
             symlinks=brezn_table.get("symlinks", []),
         )
 
     project_root: Path
-    env_dir: Path
+    dir: Path
     files: list[str]
     symlinks: list[str]
 

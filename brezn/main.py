@@ -48,9 +48,8 @@ def run(ctx, file, options):
     file = Path(file)
 
     project_root = config.project_root
-    env_dir = config.env_dir
-    if not env_dir.is_absolute():
-        env_dir = (project_root / config.env_dir).resolve()
+    brezn_dir = config.dir
+    env_dir = brezn_dir / "envs"
 
     # Parse the rules for which files to copy
     rules = [rule for r in config.files if (rule := gi.try_parse_rule(r)) is not None]
@@ -60,15 +59,18 @@ def run(ctx, file, options):
             for line in (project_root / ".gitignore").read_text().splitlines()
             if (rule := gi.try_parse_rule(line)) is not None
         ]
-        # Negate the gitignore rules to make the "add" rules
+        # Negate the gitignore rules to make them "add" rules
         for rule in gitignore:
             rule.negative = not rule.negative
         rules += gitignore
-    # Ignore anything in the environment directory
-    if env_dir.is_relative_to(project_root):
-        rules += [
-            gi.Rule(negative=True, content="/" + str(env_dir.relative_to(project_root)))
-        ]
+    # Ignore anything in the brezn directory
+    brezn_project_dir = None
+    if not brezn_dir.is_absolute():
+        brezn_project_dir = brezn_dir
+    elif brezn_dir.is_relative_to(project_root):
+        brezn_project_dir = brezn_dir.relative_to(project_root)
+    if brezn_project_dir is not None:
+        rules += [gi.Rule(negative=True, content="/" + str(brezn_project_dir))]
     files = enumerate_files(project_root, rules)
 
     # Construct the files to symlink into the environment directory
