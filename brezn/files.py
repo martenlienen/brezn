@@ -36,12 +36,13 @@ def enumerate_files(root: Path, rules: list[gi.Rule]):
 def hash_files(files: list[Path]) -> str:
     """Compute a single hash for a bunch of files."""
 
-    cmd = ["sha256sum"] + (sorted(files))
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, check=True)
-    if proc.returncode != 0:
-        raise RuntimeError("Could not hash files")
     m = hashlib.blake2b(digest_size=12)
-    m.update(proc.stdout)
+    if len(files) > 0:
+        cmd = ["sha256sum"] + (sorted(files))
+        proc = subprocess.run(cmd, stdout=subprocess.PIPE, check=True)
+        if proc.returncode != 0:
+            raise RuntimeError("Could not hash files")
+        m.update(proc.stdout)
     return m.hexdigest()
 
 
