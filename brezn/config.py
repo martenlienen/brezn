@@ -13,15 +13,19 @@ class Config:
 
         return Config(
             project_root=file.parent,
-            dir=Path(brezn_table.get("dir", ".brezn")),
+            brezn_dir=Path(brezn_table.get("dir", ".brezn")),
             files=brezn_table.get("files", []),
             symlinks=brezn_table.get("symlinks", []),
         )
 
     project_root: Path
-    dir: Path
+    brezn_dir: Path
     files: list[str]
     symlinks: list[str]
+
+    @property
+    def envs_dir(self) -> Path:
+        return self.brezn_dir / "envs"
 
 
 def find_pyproject_toml():
