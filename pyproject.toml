@@ -23,7 +23,7 @@ dependencies = [
 ]
 
 [project.scripts]
-brezn = "brezn.main:main"
+brezn = "brezn.cli.main:main"
 
 [project.optional-dependencies]
 test = ["pytest"]
