@@ -13,6 +13,11 @@ class JobLauncher[T]:
         pass
 
     @abstractmethod
+    def run_job(self, job: T):
+        """Run the job interactively."""
+        pass
+
+    @abstractmethod
     def launch_job(self, job: T):
-        """Launch a prepared job."""
+        """Launch the job in batch-mode."""
         pass

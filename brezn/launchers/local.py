@@ -1,5 +1,6 @@
 import logging
 import shlex
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Iterable
@@ -68,9 +69,15 @@ cd "${{script_dir}}/env"
 
         return LocalJob(job_dir)
 
-    def launch_job(self, job: LocalJob):
-        """Run the job prepared in the given directory."""
-
-        import subprocess
-
+    def run_job(self, job: LocalJob):
+        # Run the job and wait for it
         subprocess.run(job.path / "script")
+
+    def launch_job(self, job: LocalJob):
+        # Just run the job and terminate
+        subprocess.Popen(
+            job.path / "script",
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
