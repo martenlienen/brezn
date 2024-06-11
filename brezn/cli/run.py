@@ -1,4 +1,5 @@
 import logging
+from typing import Literal
 
 from ..config import Config
 from ..environment import Environment
@@ -8,10 +9,13 @@ from ..launchers.local import LocalLauncher
 log = logging.getLogger(__name__)
 
 
-def run_cli(config: Config, command: tuple[str]):
+def run_cli(config: Config, command: tuple[str], launcher_type: Literal["local"]):
     """Implementation of the run CLI command."""
 
-    launcher = LocalLauncher()
+    if launcher_type == "local":
+        launcher = LocalLauncher()
+    else:
+        raise ValueError(f"Unknown launcher: {launcher_type}")
 
     log.info("Preparing environment")
     env = Environment.prepare(config)

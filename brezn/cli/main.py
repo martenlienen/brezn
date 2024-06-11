@@ -32,11 +32,12 @@ def main(ctx, verbose, config):
 
 
 @main.command(context_settings={"ignore_unknown_options": True})
+@click.option("-l", "--launcher", default="local", type=click.Choice(["local"]))
 @click.argument("command", nargs=-1)
 @click.pass_context
-def run(ctx, command):
+def run(ctx, command, launcher):
     """Run the provided command after copying the environment."""
 
     from .run import run_cli
 
-    run_cli(ctx.obj, command)
+    run_cli(ctx.obj, command, launcher)
