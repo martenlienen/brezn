@@ -5,7 +5,9 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
+import cattrs
 import gitignorant as gi
+import toml
 
 from ..config import Config
 from ..files import copy_files, enumerate_files, hash_files, symlink_files
@@ -119,6 +121,10 @@ def prepare_job(config: Config, env_dir: Path, command: tuple[str]) -> Path:
 
     # Symlink the environment into the job directory
     (job_dir / "env").symlink_to(env_dir.relative_to(job_dir, walk_up=True))
+
+    config_path = job_dir / "brezn.toml"
+    with config_path.open("w") as f:
+        toml.dump(cattrs.unstructure(config), f)
 
     # Store the command to run as a script
     script = f"""#!/bin/bash

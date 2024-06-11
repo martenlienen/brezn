@@ -1,11 +1,16 @@
-from dataclasses import dataclass
 from pathlib import Path
 
+import attrs
 import toml
 
 
-@dataclass
+@attrs.frozen
 class Config:
+    project_root: Path
+    brezn_dir: Path = Path(".brezn")
+    files: list[str] = []
+    symlinks: list[str] = []
+
     @staticmethod
     def from_pyproject_toml(file: Path):
         pyproject = toml.load(file)
@@ -17,11 +22,6 @@ class Config:
             files=brezn_table.get("files", []),
             symlinks=brezn_table.get("symlinks", []),
         )
-
-    project_root: Path
-    brezn_dir: Path
-    files: list[str]
-    symlinks: list[str]
 
     @property
     def envs_dir(self) -> Path:

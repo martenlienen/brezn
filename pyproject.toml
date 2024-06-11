@@ -20,6 +20,8 @@ dependencies = [
   "click",
   "toml",
   "gitignorant",
+  "attrs",
+  "cattrs",
 ]
 
 [project.scripts]
