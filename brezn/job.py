@@ -1,4 +1,5 @@
 import logging
+import shlex
 from datetime import datetime
 from pathlib import Path
 from typing import Iterable
@@ -9,6 +10,7 @@ import toml
 
 from .config import Config
 from .environment import Environment
+from .files import write_script
 
 log = logging.getLogger(__name__)
 
@@ -28,13 +30,27 @@ def hash_messages(messages: Iterable[str], *, hash_length: int = 12) -> str:
 
 
 @attrs.frozen
+class JobDir:
+    # Path of the job directory
+    path: Path
+
+    # Path of the command script relative to the job directory
+    command_script: Path
+
+
+@attrs.frozen
 class Job:
     """A job is a command to be run in a specific environment."""
 
     env: Environment
     command: tuple[str]
 
-    def create_basic_job_dir(self, config: Config) -> Path:
+    @property
+    def shell_command(self):
+        """A formatted shell command to be run in the environment directory."""
+        return shlex.join(self.command)
+
+    def create_basic_job_dir(self, config: Config) -> JobDir:
         now = datetime.now()
         command_hash = hash_messages(self.command, hash_length=6)
         job_name = now.strftime("%Y%m%d-%H%M%S") + "-" + command_hash
@@ -49,4 +65,21 @@ class Job:
         with config_path.open("w") as f:
             toml.dump(cattrs.unstructure(config), f)
 
-        return job_dir
+        script_name = "command.sh"
+        self.write_job_script(job_dir, script_name=script_name)
+
+        return JobDir(job_dir, Path(script_name))
+
+    def write_job_script(self, job_dir: Path, *, script_name: str):
+        """Write a script that executes the command in the environment."""
+
+        script = f"""#!/bin/bash
+
+# Move into the environment
+script_dir="$(cd "$(dirname "${{BASH_SOURCE[0]}}")" > /dev/null && pwd)"
+cd "${{script_dir}}/env"
+
+# Run the user-specified command
+{self.shell_command}
+"""
+        write_script(job_dir / script_name, script)

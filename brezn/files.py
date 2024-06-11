@@ -1,4 +1,5 @@
 import hashlib
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -67,3 +68,12 @@ def symlink_files(from_: Path, to: Path, files: list[Path]):
         target = (from_ / f).resolve()
 
         link.symlink_to(target)
+
+
+def write_script(path: Path, script: str):
+    """Write a script to a path and make it executable."""
+
+    path.write_text(script)
+    mode = os.stat(path).st_mode
+    # Set all executable bits
+    path.chmod(mode | 0o111)
