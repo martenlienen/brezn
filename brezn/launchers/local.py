@@ -61,7 +61,13 @@ script_dir="$(cd "$(dirname "${{BASH_SOURCE[0]}}")" > /dev/null && pwd)"
 cd "${{script_dir}}/env"
 
 # Run the user-specified command
-{shlex.join(job.command)}
+if [[ $1 == "--interactive" ]]; then
+  # Some commands like htop break if their streams are redirected, so we don't
+  # record streams in interactive mode
+  ({shlex.join(job.command)})
+else
+  ({shlex.join(job.command)}) > >(tee "${{script_dir}}/stdout.log") 2> >(tee "${{script_dir}}/stderr.log" >&2)
+fi
 """
         script_path = job_dir / "script"
         script_path.write_text(script)
@@ -71,7 +77,7 @@ cd "${{script_dir}}/env"
 
     def run_job(self, job: LocalJob):
         # Run the job and wait for it
-        subprocess.run(job.path / "script")
+        subprocess.run((job.path / "script", "--interactive"))
 
     def launch_job(self, job: LocalJob):
         # Just run the job and terminate
