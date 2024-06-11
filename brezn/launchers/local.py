@@ -11,6 +11,8 @@ from .launcher import JobLauncher
 
 log = logging.getLogger(__name__)
 
+COMMAND_SCRIPT_NAME = "command.sh"
+
 
 @attrs.frozen
 class LocalJob:
@@ -28,7 +30,7 @@ cd "${{script_dir}}/env"
 # Run the user-specified command
 {command}
 """
-    script_path = job_dir / "script"
+    script_path = job_dir / COMMAND_SCRIPT_NAME
     script_path.write_text(script)
     script_path.chmod(0o755)
 
@@ -44,7 +46,7 @@ class LocalLauncher(JobLauncher[LocalJob]):
 
     def run_job(self, job: LocalJob):
         # Run the job and wait for it
-        subprocess.run(job.path / "script")
+        subprocess.run(job.path / COMMAND_SCRIPT_NAME)
 
     def prepare_job(self, config: Config, job: Job) -> LocalJob:
         job_dir = job.create_basic_job_dir(config)
@@ -61,7 +63,7 @@ class LocalLauncher(JobLauncher[LocalJob]):
     def launch_job(self, job: LocalJob):
         # Just run the job and terminate
         proc = subprocess.Popen(
-            job.path / "script",
+            job.path / COMMAND_SCRIPT_NAME,
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
