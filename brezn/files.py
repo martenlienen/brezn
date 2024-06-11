@@ -10,7 +10,7 @@ def enumerate_files(root: Path, rules: list[gi.Rule]):
     """Enumerate all files under `root` according to (inverse) gitignore rules."""
 
     assert root.is_dir()
-    dirs = [(root, None)]
+    dirs: list[tuple[Path, bool | None]] = [(root, None)]
     files = []
     i = 0
     while i < len(dirs):
@@ -49,9 +49,7 @@ def hash_files(files: list[Path]) -> str:
 def copy_files(from_: Path, to: Path, files: list[Path]):
     """Copy `files` and their parent directories from `from_` to `to`."""
 
-    dirs = set()
-    for f in files:
-        dirs.update(f.parents)
+    dirs = set([p for f in files for p in f.parents])
     to_copy = set(files) | dirs
 
     def ignore(path, contents):

@@ -4,6 +4,7 @@ import shutil
 import tempfile
 from datetime import datetime
 from pathlib import Path
+from typing import Iterable
 
 import cattrs
 import gitignorant as gi
@@ -95,7 +96,7 @@ def prepare_environment(config: Config) -> Path:
     return env_dir
 
 
-def hash_messages(messages: list[str], *, hash_length: int = 12) -> str:
+def hash_messages(messages: Iterable[str], *, hash_length: int = 12) -> str:
     """Compute a hex-encoded hash string for messages."""
 
     assert hash_length % 2 == 0
