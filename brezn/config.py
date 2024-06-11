@@ -27,6 +27,10 @@ class Config:
     def envs_dir(self) -> Path:
         return self.brezn_dir / "envs"
 
+    @property
+    def jobs_dir(self) -> Path:
+        return self.brezn_dir / "jobs"
+
 
 def find_pyproject_toml():
     dir = Path.cwd().resolve()

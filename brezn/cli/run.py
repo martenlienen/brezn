@@ -1,7 +1,8 @@
 import logging
-import os
+import shlex
 import shutil
 import tempfile
+from datetime import datetime
 from pathlib import Path
 
 import gitignorant as gi
@@ -75,18 +76,8 @@ def create_environment(config: Config, files: list[Path], symlinks: list[Path]) 
     return env_dir
 
 
-def run_command(cwd: Path, command: tuple[str]):
-    """Run the command in the given directory."""
-
-    os.chdir(cwd.absolute())
-
-    import subprocess
-
-    subprocess.run(command)
-
-
-def run_cli(config: Config, command: tuple[str]):
-    """Implementation of the run CLI command."""
+def prepare_environment(config: Config) -> Path:
+    """Prepare a frozen environment."""
 
     files = collect_files(config)
     log.debug("Files to copy: %s", files)
@@ -99,5 +90,69 @@ def run_cli(config: Config, command: tuple[str]):
     env_dir = create_environment(config, files, symlinks)
     log.debug("Environment directory: %s", env_dir)
 
-    log.debug("Running command: %s", command)
-    run_command(env_dir, command)
+    return env_dir
+
+
+def hash_messages(messages: list[str], *, hash_length: int = 12) -> str:
+    """Compute a hex-encoded hash string for messages."""
+
+    assert hash_length % 2 == 0
+    import hashlib
+
+    # Use half the requested hash length as number of bytes for the digest size, because
+    # the digest is in raw bytes and will be twice as long when hex-encoded.
+    m = hashlib.blake2b(digest_size=hash_length // 2)
+    for message in messages:
+        m.update(message.encode("utf-8"))
+    return m.hexdigest()
+
+
+def prepare_job(config: Config, env_dir: Path, command: tuple[str]) -> Path:
+    """Prepare a job directory with all related information."""
+
+    now = datetime.now()
+    command_hash = hash_messages(command, hash_length=6)
+    job_name = now.strftime("%Y%m%d-%H%M%S") + "-" + command_hash
+    job_dir = config.jobs_dir / job_name
+    log.debug("Job directory: %s", job_dir)
+    job_dir.mkdir(exist_ok=True, parents=True)
+
+    # Symlink the environment into the job directory
+    (job_dir / "env").symlink_to(env_dir.relative_to(job_dir, walk_up=True))
+
+    # Store the command to run as a script
+    script = f"""#!/bin/bash
+
+# Move into the environment
+script_dir="$(cd "$(dirname "${{BASH_SOURCE[0]}}")" > /dev/null && pwd)"
+cd "${{script_dir}}/env"
+
+# Run the user-specified command
+{shlex.join(command)}
+"""
+    script_path = job_dir / "script"
+    script_path.write_text(script)
+    script_path.chmod(0o755)
+
+    return job_dir
+
+
+def run_job(job_dir: Path):
+    """Run the job prepared in the given directory."""
+
+    import subprocess
+
+    subprocess.run(job_dir / "script")
+
+
+def run_cli(config: Config, command: tuple[str]):
+    """Implementation of the run CLI command."""
+
+    log.info("Preparing environment")
+    env_dir = prepare_environment(config)
+
+    log.info("Preparing job")
+    job_dir = prepare_job(config, env_dir, command)
+
+    log.info("Running job")
+    run_job(job_dir)
