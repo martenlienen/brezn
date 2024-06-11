@@ -1,4 +1,5 @@
 import logging
+import shlex
 import subprocess
 
 from ..config import Config
@@ -23,8 +24,12 @@ class LocalLauncher(JobLauncher[JobDir]):
 
         # Run the command and record both stdout and stderr transparently
         script = f"""#!/bin/bash
-script_dir="$(cd "$(dirname "${{BASH_SOURCE[0]}}")" > /dev/null && pwd)"
-"${{script_dir}}/{job_dir.command_script}" > >(tee "${{script_dir}}/stdout.log") 2> >(tee "${{script_dir}}/stderr.log" >&2)
+
+# Change into job directory
+cd "${{0%/*}}"
+
+# Run command
+{shlex.quote("./" + str(job_dir.command_script))} > >(tee ./stdout.log) 2> >(tee ./stderr.log >&2)
 """
         write_script(job_dir.path / "batch.sh", script)
 

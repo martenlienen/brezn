@@ -76,8 +76,7 @@ class Job:
         script = f"""#!/bin/bash
 
 # Move into the environment
-script_dir="$(cd "$(dirname "${{BASH_SOURCE[0]}}")" > /dev/null && pwd)"
-cd "${{script_dir}}/env"
+cd "${{0%/*}}/env"
 
 # Run the user-specified command
 {self.shell_command}
