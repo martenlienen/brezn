@@ -41,7 +41,7 @@ def rin_cli(config: Config, command: tuple[str], launcher_type: Literal["local"]
 
     log.info("Preparing job")
     job = Job(env, command)
-    prepared_job = launcher.prepare_job(config, job)
+    prepared_job = launcher.prepare_interactive_job(config, job)
 
     log.info("Running job")
     launcher.run_job(prepared_job)
