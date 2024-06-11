@@ -60,9 +60,20 @@ class LocalLauncher(JobLauncher[LocalJob]):
 
     def launch_job(self, job: LocalJob):
         # Just run the job and terminate
-        subprocess.Popen(
+        proc = subprocess.Popen(
             job.path / "script",
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
+
+        # Wait for just 100ms to see if the command fails immediately and print its
+        # stdout and stderr for easier debugging
+        try:
+            returncode = proc.wait(0.1)
+            if returncode is not None and returncode > 0:
+                log.info("Job failed immediately")
+                print((job.path / "stdout.log").read_text())
+                print((job.path / "stderr.log").read_text())
+        except subprocess.TimeoutExpired:
+            pass
