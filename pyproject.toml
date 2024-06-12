@@ -29,7 +29,7 @@ dependencies = [
 brezn = "brezn.cli.main:main"
 
 [project.optional-dependencies]
-test = ["pytest"]
+dev = ["pytest", "mypy"]
 
 [project.urls]
 homepage = "https://github.com/martenlienen/brezn"
@@ -39,3 +39,6 @@ exclude = ["tests/"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.mypy]
+enable_incomplete_feature = ["NewGenericSyntax"]
