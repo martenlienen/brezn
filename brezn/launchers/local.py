@@ -1,10 +1,10 @@
 import logging
-import shlex
 import subprocess
 
 from ..config import Config
 from ..files import write_script
 from ..job import Job, JobDir
+from ..templates import render_template
 from .launcher import JobLauncher
 
 log = logging.getLogger(__name__)
@@ -22,15 +22,9 @@ class LocalLauncher(JobLauncher[JobDir]):
     def prepare_job(self, config: Config, job: Job) -> JobDir:
         job_dir = job.create_basic_job_dir(config)
 
-        # Run the command and record both stdout and stderr transparently
-        script = f"""#!/bin/bash
-
-# Change into job directory
-cd "${{0%/*}}"
-
-# Run command
-{shlex.quote("./" + str(job_dir.command_script))} > >(tee ./stdout.log) 2> >(tee ./stderr.log >&2)
-"""
+        script = render_template(
+            "local/batch.j2.sh", command_script=job_dir.command_script
+        )
         write_script(job_dir.path / "batch.sh", script)
 
         return job_dir

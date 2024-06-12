@@ -11,6 +11,7 @@ import toml
 from .config import Config
 from .environment import Environment
 from .files import write_script
+from .templates import render_template
 
 log = logging.getLogger(__name__)
 
@@ -73,12 +74,5 @@ class Job:
     def write_job_script(self, job_dir: Path, *, script_name: str):
         """Write a script that executes the command in the environment."""
 
-        script = f"""#!/bin/bash
-
-# Move into the environment
-cd "${{0%/*}}/env"
-
-# Run the user-specified command
-{self.shell_command}
-"""
+        script = render_template("job.j2.sh", shell_command=self.shell_command)
         write_script(job_dir / script_name, script)

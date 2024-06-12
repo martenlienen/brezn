@@ -22,6 +22,7 @@ dependencies = [
   "gitignorant",
   "attrs",
   "cattrs",
+  "jinja2",
 ]
 
 [project.scripts]
