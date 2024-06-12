@@ -1,0 +1,10 @@
+site_name: brezn
+site_url: "https://brezn.readthedocs.org/"
+repo_url: "https://github.com/martenlienen/brezn"
+site_description: "brezn runs your computational experiments"
+
+theme:
+  name: readthedocs
+
+nav:
+  - "Introduction": README.md
