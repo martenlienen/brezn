@@ -10,10 +10,14 @@ log = logging.getLogger("brezn")
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
-@click.option("-v", "--verbose", count=True)
-@click.option("-c", "--config")
+@click.option(
+    "-v",
+    "--verbose",
+    count=True,
+    help="Increase verbosity level. Can be passed multiple times.",
+)
 @click.pass_context
-def main(ctx, verbose, config):
+def main(ctx, verbose):
     """brezn launches experiments."""
 
     if verbose >= 1:
