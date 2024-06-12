@@ -14,7 +14,7 @@ log = logging.getLogger("brezn")
 @click.option("-c", "--config")
 @click.pass_context
 def main(ctx, verbose, config):
-    """Something layered on top of hydra."""
+    """brezn launches experiments."""
 
     if verbose >= 1:
         logging.basicConfig()

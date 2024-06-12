@@ -1,10 +1,8 @@
 # brezn :pretzel:
 
-This is my attempt at figuring out what I would like a
-[seml](https://github.com/TUM-DAML/seml) equivalent built on top of
-[hydra](https://hydra.cc) to look like. In particular, I want to have code isolation, i.e.
-making a copy of the code when you run a job, so that you can continue working on your
-code while your jobs wait in a SLURM queue.
+`brezn` runs your experiments regardless of which configuration or logging framework you
+use. It takes an arbitrary command and runs it in an isolated environment on your own
+computer or a cluster such as slurm.
 
 `brezn` comes with *absolutely no guarantees* regarding stability or backwards
 compatibility. You have been warned.
