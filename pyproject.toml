@@ -26,7 +26,7 @@ dependencies = [
 ]
 
 [project.scripts]
-brezn = "brezn.cli.main:main"
+brezn = "brezn.cli:main"
 
 [project.optional-dependencies]
 dev = ["pytest", "mypy"]

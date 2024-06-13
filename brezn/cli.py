@@ -2,7 +2,10 @@ import logging
 
 import click
 
-from ..config import Config, find_pyproject_toml
+from .config import Config, find_pyproject_toml
+from .environment import Environment
+from .job import Job
+from .launchers import get_launcher
 
 # Since this module controls the application, we get the root logger here instead of the
 # one specified by __name__
@@ -48,9 +51,20 @@ def main(ctx, launcher, verbose):
 def run(ctx, command):
     """Run COMMAND in batch-mode (in the background)."""
 
-    from .run import run_cli
+    config: Config = ctx.obj
 
-    run_cli(ctx.obj, command)
+    log.info("Instantiating launcher")
+    launcher = get_launcher(config)
+
+    log.info("Preparing environment")
+    env = Environment.prepare(config)
+
+    log.info("Preparing job")
+    job = Job(env, command)
+    prepared_job = launcher.prepare_job(config, job)
+
+    log.info("Launching job")
+    launcher.launch_job(prepared_job)
 
 
 @main.command(context_settings={"ignore_unknown_options": True})
@@ -59,6 +73,28 @@ def run(ctx, command):
 def rin(ctx, command):
     """Run COMMAND interactively."""
 
-    from .run import rin_cli
+    config: Config = ctx.obj
 
-    rin_cli(ctx.obj, command)
+    log.info("Instantiating launcher")
+    launcher = get_launcher(config)
+
+    log.info("Preparing environment")
+    env = Environment.prepare(config)
+
+    log.info("Preparing job")
+    job = Job(env, command)
+    prepared_job = launcher.prepare_interactive_job(config, job)
+
+    log.info("Running job")
+    launcher.run_job(prepared_job)
+
+
+@main.command(context_settings={"ignore_unknown_options": True})
+@click.argument("config", type=click.Path(readable=True, dir_okay=False))
+@click.pass_context
+def sweep(ctx, config):
+    """Sweep over all commands in the sweep configuration."""
+
+    from .sweep import sweep_cli
+
+    sweep_cli(ctx.obj, config)
