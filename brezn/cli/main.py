@@ -11,13 +11,20 @@ log = logging.getLogger("brezn")
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 @click.option(
+    "-l",
+    "--launcher",
+    default=None,
+    type=click.Choice(["local", "slurm"]),
+    help="Launcher to use.",
+)
+@click.option(
     "-v",
     "--verbose",
     count=True,
     help="Increase verbosity level. Can be passed multiple times.",
 )
 @click.pass_context
-def main(ctx, verbose):
+def main(ctx, launcher, verbose):
     """brezn launches experiments."""
 
     if verbose >= 1:
@@ -31,29 +38,27 @@ def main(ctx, verbose):
         raise click.ClickException("Could not find a pyproject.toml")
 
     log.info(f"Load configuration from {pyproject_toml}")
-    ctx.obj = Config.from_pyproject_toml(pyproject_toml)
+    ctx.obj = Config.from_pyproject_toml(pyproject_toml, launcher)
     log.info(f"Configuration {ctx.obj}")
 
 
 @main.command(context_settings={"ignore_unknown_options": True})
-@click.option("-l", "--launcher", default="local", type=click.Choice(["local"]))
 @click.argument("command", nargs=-1)
 @click.pass_context
-def run(ctx, command, launcher):
+def run(ctx, command):
     """Run COMMAND in batch-mode (in the background)."""
 
     from .run import run_cli
 
-    run_cli(ctx.obj, command, launcher)
+    run_cli(ctx.obj, command)
 
 
 @main.command(context_settings={"ignore_unknown_options": True})
-@click.option("-l", "--launcher", default="local", type=click.Choice(["local"]))
 @click.argument("command", nargs=-1)
 @click.pass_context
-def rin(ctx, command, launcher):
+def rin(ctx, command):
     """Run COMMAND interactively."""
 
     from .run import rin_cli
 
-    rin_cli(ctx.obj, command, launcher)
+    rin_cli(ctx.obj, command)

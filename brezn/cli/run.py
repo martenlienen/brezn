@@ -1,21 +1,18 @@
 import logging
-from typing import Literal
 
 from ..config import Config
 from ..environment import Environment
 from ..job import Job
-from ..launchers.local import LocalLauncher
+from ..launchers import get_launcher
 
 log = logging.getLogger(__name__)
 
 
-def run_cli(config: Config, command: tuple[str], launcher_type: Literal["local"]):
+def run_cli(config: Config, command: tuple[str]):
     """Implementation of the run CLI command."""
 
-    if launcher_type == "local":
-        launcher = LocalLauncher()
-    else:
-        raise ValueError(f"Unknown launcher: {launcher_type}")
+    log.info("Instantiating launcher")
+    launcher = get_launcher(config)
 
     log.info("Preparing environment")
     env = Environment.prepare(config)
@@ -28,13 +25,11 @@ def run_cli(config: Config, command: tuple[str], launcher_type: Literal["local"]
     launcher.launch_job(prepared_job)
 
 
-def rin_cli(config: Config, command: tuple[str], launcher_type: Literal["local"]):
+def rin_cli(config: Config, command: tuple[str]):
     """Implementation of the rin CLI command."""
 
-    if launcher_type == "local":
-        launcher = LocalLauncher()
-    else:
-        raise ValueError(f"Unknown launcher: {launcher_type}")
+    log.info("Instantiating launcher")
+    launcher = get_launcher(config)
 
     log.info("Preparing environment")
     env = Environment.prepare(config)

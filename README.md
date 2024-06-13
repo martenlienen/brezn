@@ -36,6 +36,10 @@ files = [
 symlinks = [
   "data/",
 ]
+
+[tool.brezn.launchers.slurm.sbatch]
+partition = "gpu_a100"
+time = "2-0"
 ```
 
 ### Run a command
