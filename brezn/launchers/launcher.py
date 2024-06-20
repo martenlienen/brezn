@@ -4,6 +4,15 @@ from ..config import Config
 from ..job import Job
 
 
+class LauncherConfig:
+    """Configuration for a job launcher."""
+
+    @abstractmethod
+    def instantiate(self) -> "JobLauncher":
+        """Instantiate the job launcher."""
+        raise NotImplementedError()
+
+
 class JobLauncher[T]:
     """A job launcher launches jobs, e.g. locally or on a cluster."""
 

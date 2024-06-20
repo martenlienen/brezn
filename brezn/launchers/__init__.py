@@ -1,18 +1,23 @@
+from typing import Type
+
+import cattrs
+
 from ..config import Config
-from .launcher import JobLauncher
+from .launcher import JobLauncher, LauncherConfig
 
 
 def get_launcher(config: Config) -> JobLauncher:
-    type = config.launcher
-    if type == "local":
-        from ..launchers.local import LocalLauncher
+    launcher = config.launcher
+    type: Type[LauncherConfig]
+    if launcher == "local":
+        from ..launchers.local import LocalLauncherConfig
 
-        return LocalLauncher()
-    elif type == "slurm":
-        from ..launchers.slurm import SlurmLauncher
+        type = LocalLauncherConfig
+    elif launcher == "slurm":
+        from ..launchers.slurm import SlurmLauncherConfig
 
-        return SlurmLauncher(
-            sbatch_options=config.launcher_configs.get("slurm", {}).get("sbatch", {})
-        )
+        type = SlurmLauncherConfig
     else:
         raise ValueError(f"Unknown launcher: {type}")
+
+    return cattrs.structure(config.launchers.get(launcher, {}), type).instantiate()

@@ -1,13 +1,21 @@
 import logging
 import subprocess
 
+import attrs
+
 from ..config import Config
 from ..files import write_script
 from ..job import Job, JobDir
 from ..templates import render_template
-from .launcher import JobLauncher
+from .launcher import JobLauncher, LauncherConfig
 
 log = logging.getLogger(__name__)
+
+
+@attrs.frozen
+class LocalLauncherConfig(LauncherConfig):
+    def instantiate(self):
+        return LocalLauncher()
 
 
 class LocalLauncher(JobLauncher[JobDir]):

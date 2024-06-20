@@ -7,7 +7,7 @@ from ..config import Config
 from ..files import write_script
 from ..job import Job, JobDir
 from ..templates import render_template
-from .launcher import JobLauncher
+from .launcher import JobLauncher, LauncherConfig
 
 log = logging.getLogger(__name__)
 
@@ -15,6 +15,14 @@ log = logging.getLogger(__name__)
 @attrs.frozen
 class SlurmJob:
     dir: JobDir
+
+
+@attrs.frozen
+class SlurmLauncherConfig(LauncherConfig):
+    sbatch: dict[str, str]
+
+    def instantiate(self):
+        return SlurmLauncher(sbatch_options=self.sbatch)
 
 
 class SlurmLauncher(JobLauncher[SlurmJob]):

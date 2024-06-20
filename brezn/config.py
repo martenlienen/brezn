@@ -1,6 +1,8 @@
 from pathlib import Path
+from typing import Any
 
 import attrs
+import cattrs
 import toml
 
 
@@ -12,23 +14,19 @@ class Config:
     brezn_dir: Path = Path(".brezn")
     files: list[str] = []
     symlinks: list[str] = []
-    launcher: str = "local"
 
-    launcher_configs: dict[str, dict] = {}
+    launcher: str = "local"
+    launchers: dict[str, Any] = {}
 
     @staticmethod
-    def from_pyproject_toml(file: Path, launcher: str):
+    def from_pyproject_toml(file: Path, launcher: str | None):
         pyproject = toml.load(file)
         brezn_table = pyproject.get("tool", {}).get("brezn", {})
+        brezn_table.setdefault("project_root", file.parent)
+        if launcher is not None:
+            brezn_table["launcher"] = launcher
 
-        return Config(
-            project_root=file.parent,
-            brezn_dir=Path(brezn_table.get("dir", ".brezn")),
-            files=brezn_table.get("files", []),
-            symlinks=brezn_table.get("symlinks", []),
-            launcher=launcher or brezn_table.get("launcher", "local"),
-            launcher_configs=brezn_table.get("launchers", {}),
-        )
+        return cattrs.structure(brezn_table, Config)
 
     @property
     def envs_dir(self) -> Path:
