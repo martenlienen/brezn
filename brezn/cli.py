@@ -48,7 +48,7 @@ def main(ctx, launcher, verbose):
 @main.command(context_settings={"ignore_unknown_options": True})
 @click.argument("command", nargs=-1)
 @click.pass_context
-def run(ctx, command):
+def run(ctx, command) -> None:
     """Run COMMAND in batch-mode (in the background)."""
 
     config: Config = ctx.obj
@@ -70,7 +70,7 @@ def run(ctx, command):
 @main.command(context_settings={"ignore_unknown_options": True})
 @click.argument("command", nargs=-1)
 @click.pass_context
-def rin(ctx, command):
+def rin(ctx, command) -> None:
     """Run COMMAND interactively."""
 
     config: Config = ctx.obj
