@@ -6,7 +6,7 @@ build-backend = "flit_core.buildapi"
 name = "brezn"
 dynamic = ["version", "description"]
 readme = "README.md"
-requires-python = ">= 3.10"
+requires-python = ">= 3.12"
 license = {file = "LICENSE"}
 authors = [{name = "Marten Lienen", email = "marten.lienen@gmail.com"}]
 classifiers = [
