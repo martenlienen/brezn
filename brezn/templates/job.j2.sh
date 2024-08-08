@@ -3,5 +3,5 @@
 # Change into environment directory
 cd "${0%/*}/env"
 
-# Run command user-specified command
+# Run user-specified command
 {{shell_command}}
