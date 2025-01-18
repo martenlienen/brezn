@@ -67,6 +67,13 @@ def symlink_files(from_: Path, to: Path, files: list[Path]):
         link = to / f
         target = (from_ / f).resolve()
 
+        if not target.exists():
+            # If a symlink target does not exist, just create it as a directory. I think
+            # this will be less confusing and frustrating than creating symlinks to
+            # non-existent targets and in my experience symlink targets have always been
+            # directories anyway.
+            target.mkdir(parents=True, exist_ok=True)
+
         link.symlink_to(target)
 
 
